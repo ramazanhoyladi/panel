@@ -16,6 +16,10 @@ FROM --platform=$TARGETOS/$TARGETARCH php:8.3-fpm-alpine AS composer
 
 WORKDIR /build
 
+# Önce PHP uzantılarını yükle
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN install-php-extensions bcmath gd intl zip opcache pcntl posix pdo_mysql
+
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Copy bare minimum to install Composer dependencies
@@ -65,6 +69,10 @@ RUN yarn run build
 FROM --platform=$TARGETOS/$TARGETARCH php:8.3-fpm-alpine AS final
 
 WORKDIR /var/www/html
+
+# PHP uzantılarını yükle
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN install-php-extensions bcmath gd intl zip opcache pcntl posix pdo_mysql
 
 # Install additional required libraries
 # Not: Traefik yönlendirme yapacağı için Caddy'yi kaldırıyoruz
